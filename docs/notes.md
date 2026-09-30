@@ -11,3 +11,19 @@ Both: work on making prompts on docs/prompt-queue.md, understanding child privac
 Ankan
 
 -- Possibility of using claude skills in Cursor (would that cost xtra money, do we need anthropic plan)
+
+Notes of call w/ Mr. Anshu:
+
+-- Don't use cursor to fix problem, understand how to fix it/best practices are to fix it
+
+-- guide the agent with specifications for the agent, "Spec-driven developement"; ask the agent to create a spec (plan feature on cursor)
+
+-- more complex model for planning and switch to smalller model to run the plan
+
+-- depends on optimization --> go for midsized model (sonnet or opus) trial and error, lots of research trying them out; agent skills is a standard way to go, good idea
+
+-- [agent.md](http://agent.md) file in repo, explaining what the repository does
+
+
+
+-- understanding basics of what the code is doing (create cursor chat for both me and Sidak, spend time learning stuff)
