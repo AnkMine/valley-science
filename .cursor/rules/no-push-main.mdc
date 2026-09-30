@@ -1,0 +1,10 @@
+---
+description: no pushing to main without specific user prompt
+alwaysApply: true
+---
+
+# no pushing to main without specific user prompt
+
+no pushing to main without specific user prompt
+
+Push only the current feature branch, and only when the user asks to push. Do not push `main`, merge into `main`, or open a pull request into `main` unless the user explicitly asks for that.

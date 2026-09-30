@@ -15,12 +15,17 @@ export default defineConfig({
     port: 3000,
     proxy: {
       '/api': {
-        target: 'http://localhost:3001',
+        target: 'http://127.0.0.1:3001',
         changeOrigin: true,
+        // Local Phi-4 replies can take 20–60s; default proxy idle timeout causes ECONNRESET
+        timeout: 120_000,
+        proxyTimeout: 120_000,
       },
       '/sandbox': {
-        target: 'http://localhost:3001',
+        target: 'http://127.0.0.1:3001',
         changeOrigin: true,
+        timeout: 120_000,
+        proxyTimeout: 120_000,
       },
     },
   },

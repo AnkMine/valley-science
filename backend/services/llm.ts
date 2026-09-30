@@ -222,12 +222,34 @@ type OpenAiChatResponse = {
   error?: { message?: string };
 };
 
+/** Matches the Vite proxy window. Phi-4 replies often take 20–60s. */
+const DEFAULT_LOCAL_LLM_TIMEOUT_MS = 120_000;
+
+function localLlmTimeoutMs(): number {
+  const raw = Number(process.env.LOCAL_LLM_TIMEOUT_MS);
+  if (Number.isFinite(raw) && raw > 0) return raw;
+  return DEFAULT_LOCAL_LLM_TIMEOUT_MS;
+}
+
+function startTimeoutSignal(ms: number): { signal: AbortSignal; stop: () => void } {
+  const controller = new AbortController();
+  const timer = setTimeout(() => {
+    controller.abort(new Error(`Local LLM timed out after ${ms}ms`));
+  }, ms);
+  timer.unref();
+  return {
+    signal: controller.signal,
+    stop: () => clearTimeout(timer),
+  };
+}
+
 async function callOpenAiCompatible(options: {
   baseUrl: string;
   model: string;
   apiKey?: string;
   systemPrompt: string;
   messages: ChatTurn[];
+  signal?: AbortSignal;
 }): Promise<string | null> {
   const base = options.baseUrl.replace(/\/$/, "");
   const response = await fetch(`${base}/chat/completions`, {
@@ -247,6 +269,7 @@ async function callOpenAiCompatible(options: {
       ],
       temperature: 0.7,
     }),
+    signal: options.signal,
   });
 
   const data = (await response.json()) as OpenAiChatResponse;
@@ -261,11 +284,21 @@ async function callLocalLlm(systemPrompt: string, messages: ChatTurn[]): Promise
   const baseUrl = process.env.LOCAL_LLM_BASE_URL?.trim() || "http://127.0.0.1:1234/v1";
   const model = process.env.LOCAL_LLM_MODEL?.trim() || "phi-4-mini-instruct";
   const apiKey = process.env.LOCAL_LLM_API_KEY?.trim() || "lm-studio";
+  const timeout = startTimeoutSignal(localLlmTimeoutMs());
   try {
-    return await callOpenAiCompatible({ baseUrl, model, apiKey, systemPrompt, messages });
+    return await callOpenAiCompatible({
+      baseUrl,
+      model,
+      apiKey,
+      systemPrompt,
+      messages,
+      signal: timeout.signal,
+    });
   } catch (err) {
     console.error("Local LLM Error:", err);
     return null;
+  } finally {
+    timeout.stop();
   }
 }
 
@@ -299,7 +332,7 @@ async function callGemini(systemPrompt: string, messages: ChatTurn[]): Promise<s
 
   try {
     const response = await ai.models.generateContent({
-      model: process.env.GEMINI_MODEL?.trim() || "gemini-2.0-flash",
+      model: process.env.GEMINI_MODEL?.trim() || "gemini-2.5-flash",
       contents,
       config: {
         systemInstruction: systemPrompt,
@@ -318,7 +351,7 @@ const FALLBACK_REPLY =
 
 /**
  * Valerie reply. Provider order when AI_PROVIDER=auto:
- * local (if LOCAL_LLM_BASE_URL set) → OpenRouter → Gemini.
+ * local (default http://127.0.0.1:1234/v1) → OpenRouter → Gemini.
  */
 export async function getSocraticResponse(
   messages: ChatTurn[],
@@ -334,7 +367,10 @@ export async function getSocraticResponse(
   const tryOpenRouter = provider === "openrouter" || provider === "auto";
   const tryGemini = provider === "gemini" || provider === "auto";
 
-  if (tryLocal && (provider === "local" || process.env.LOCAL_LLM_BASE_URL?.trim())) {
+  // Always try local first for local/auto (callLocalLlm defaults to :1234).
+  // Do not require LOCAL_LLM_BASE_URL to be present — missing .env used to skip
+  // local entirely and fall through to a broken cloud path.
+  if (tryLocal) {
     const local = await callLocalLlm(systemPrompt, messages);
     if (local) return local;
     if (provider === "local") return FALLBACK_REPLY;
