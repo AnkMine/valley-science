@@ -24,6 +24,4 @@ Notes of call w/ Mr. Anshu:
 
 -- [agent.md](http://agent.md) file in repo, explaining what the repository does
 
-
-
 -- understanding basics of what the code is doing (create cursor chat for both me and Sidak, spend time learning stuff)
