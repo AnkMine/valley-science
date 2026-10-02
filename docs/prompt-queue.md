@@ -15,7 +15,9 @@ Hub folder can only be on one branch at a time. For true parallel work, use git 
 ---
 
 ## Hub / AI — `feature/ai-functions-frontend-backend`
+Make sure the system prompt is a .md file and explain how the system prompt works and when I change it what is does and how it changes valerie; and if I change system prompt do I need to push it to github first? make sure the system prompt works and that changes reflect on the web app.
 
+add a button to the chat for reset chat, new chat, delete chat and save these chats for now in a folder
 ---
 
 ## UI — `feature/ui`
