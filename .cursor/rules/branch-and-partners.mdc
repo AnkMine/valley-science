@@ -1,0 +1,28 @@
+---
+description: Which branch to use when Ankan or Sidak asks for work
+alwaysApply: true
+---
+
+# Branch and partner workflow
+
+One local folder: `/Users/ankan/Desktop/valley-science`. Work in local Cursor chats. Do not start Cloud or Background agents; they create stray `cursor/…` branches. Read `docs/branch-workflow.md`, `docs/partner-setup.md`, `docs/merge-and-sync.md`, and `docs/prompt-queue.md` before inventing a new process.
+
+Hub: `feature/ai-functions-frontend-backend`. Side tracks merge into the hub. The hub merges to `main` only when they explicitly say to ship. Never push or open a PR into `main` unless they explicitly ask. Push only when asked, and only the branch you are on.
+
+| Ask | Branch |
+| --- | --- |
+| AI, Valerie, auth, parent/student connection, progress, whole-app bugs, merges | Hub |
+| Colors, layout, visual polish | `feature/ui`, or a short `ui/…` branch that PRs into `feature/ui` first |
+| GitHub Actions, lint/test scripts, lockfiles, Node/CI fixes | `feature/app-ci-and-tests` |
+| Curriculum modules, sandbox HTML, module CSVs | `feature/modules` |
+| Prompt ideas before coding | `docs/prompt-queue.md` on the hub, then cherry-pick that single doc commit to the three side tracks (not `main`) |
+
+Not daily tracks: `chore/dev-setup-agents-md` (leave it), `feature/module-3001-sandbox` (old; hub already has the useful history), `ui/lab-polish` (short UI branch).
+
+Before editing, run `git branch --show-current`. If the checkout is the wrong track, say so and switch only when the task is clearly that track or they agree. `backend/package-lock.json` and `frontend/package-lock.json` often dirty themselves on branch switch; `git restore` those two before switching. Do not stash or `git clean` unless they ask. Do not commit the lockfile just to make a switch succeed.
+
+When Sidak asks: assume he is still learning Git, prefers local work, and owns lab/module UI plus prompt research. Give exact commands. Tell him to screenshare on conflicts. Do not create another long-lived whole-app branch.
+
+When Ankan asks: default to the hub for AI and merges. UI/CI/modules stay on their tracks, then PR into the hub (`gh pr create --base feature/ai-functions-frontend-backend`). Short `ui/…` PRs use `--base feature/ui`.
+
+Both own `docs/prompt-queue.md` and notes on CA and US child-privacy law (`docs/notes.md`). Privacy questions are research and product notes until they ask to implement them.

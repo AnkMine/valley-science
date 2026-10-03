@@ -1,0 +1,34 @@
+---
+description: What Valley Science is, who builds it, hardware, and the personal GitHub remote
+alwaysApply: true
+---
+
+# Valley Science context
+
+Educational science app for grades 3–8. Current product focus is the **individual** parent/student track and **Grade 3 Utah SEEd**. Leave the district track (teacher, admin, classrooms, assignments) as it is unless someone explicitly asks to change it.
+
+People: **Ankan** (this Mac, hub/AI/merges, student-parent bugs, Valerie prompt and model) and **Sidak** (partner; lab and module UI, prompt-queue notes, making Valerie educational and not generic). Both are high-school freshmen in the South Bay. Explain JS, React, Git, and AI in plain language. For large work, write a short spec first (Anshu: plan on a stronger model, implement on a smaller one) and wait if they have not said to build yet.
+
+## Stack
+
+- `frontend/`: React 19 + Vite + TypeScript + Tailwind. Student UI, dashboards, Socratic chat.
+- `backend/`: Express + Firebase Admin + Firestore. Auth, progress, email, Valerie. Node **22** (CI uses 22.14).
+- `sandbox/`: standalone Grade 3 HTML labs (`module3001`–`module3020`). Wired curriculum entries today: 3001 balanced forces, 3002 weather, 3007 severe weather. Grades 5 and 8 exist in `frontend/src/curriculum.ts` but are not the current build focus.
+- `training/grade3/`: RAG notes (not weight fine-tuning). Injected as `RETRIEVED_GRADE3_CONTEXT`.
+- Valerie’s behavior is `SYSTEM_INSTRUCTION` in `backend/services/llm.ts`. The app sends it on `POST /api/chat`. Do not paste it into LM Studio’s system-prompt box. Students only; parents and teachers do not get Valerie. Local calls abort after 120s.
+- Roles: student, parent, teacher, admin, founder. Access path: `individual` or `district`.
+- Run: `npm run dev:backend` and `npm run dev:frontend` (often `http://localhost:5173`). Secrets stay in gitignored `backend/.env`. Never print, commit, or send Firebase Admin JSON, API keys, or SMTP app passwords. Old chats contain real credentials; do not repeat them.
+
+## Remote
+
+Origin is the **personal** repo `git@github.com:AnkMine/valley-science.git`. The old org remote `valleyscienceas-bit/run-the-app` is historical. Docs such as `docs/partner-setup.md` still name the old URL; follow the live `git remote`, and do not rewrite those docs unless asked.
+
+## Hardware and models
+
+This computer (verified): MacBook Pro, Apple M3, **8 GB** unified memory, 8 CPU cores (4 performance + 4 efficiency), 10-core GPU, Metal 4. Local model: **Phi-4-mini Instruct Q4_K_M** in LM Studio (`AI_PROVIDER=local`, `http://127.0.0.1:1234/v1`). Do not load 8B+ models on this Mac.
+
+Sidak’s machine: Intel iMac, **32 GB**. It does **not** run models. He cannot download LM Link, so there is no shared-inference setup. Valerie runs only on Ankan’s Mac (Phi-4-mini) or a cloud provider. `docs/lm-link.md` describes a Qwen-on-his-iMac plan that is not in use; do not treat it as current.
+
+Training order: system prompt, then RAG markdown, then per-module `ahHaGoal`. Weight fine-tuning is later and needs more hardware. Swapping `LOCAL_LLM_MODEL` does not require retraining. `AI_PROVIDER=auto` tries local, then OpenRouter, then Gemini.
+
+Files named with ` 2` or ` 3` before the extension are duplicate copies. Edit the canonical file.

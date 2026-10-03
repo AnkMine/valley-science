@@ -3,6 +3,8 @@
   "private": true,
   "scripts": {
     "prepare": "bash scripts/install-git-hooks.sh",
+    "postinstall": "node scripts/require-node22.js",
+    "setup": "bash scripts/setup-dev.sh",
     "deps": "npm install --prefix frontend && npm install --prefix backend",
     "dev:frontend": "npm run dev --prefix frontend",
     "dev:backend": "npm run dev --prefix backend",

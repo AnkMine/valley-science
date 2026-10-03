@@ -1,12 +1,11 @@
 #!/usr/bin/env bash
 # Installed into .git/hooks/post-checkout by: npm run prepare
-# Ensures frontend/backend npm deps after every branch switch.
+# After a branch switch, make sure frontend and backend deps match the
+# new branch. No-op (under a second) when they already match.
 
-prev_head="${1:-}"
-new_head="${2:-}"
 branch_checkout="${3:-}"
 
-# File checkout (not branch switch) — skip
+# File checkout (not a branch switch) — skip.
 if [[ "$branch_checkout" != "1" ]]; then
   exit 0
 fi
@@ -14,13 +13,4 @@ fi
 root="$(git rev-parse --show-toplevel 2>/dev/null || true)"
 [[ -n "$root" ]] || exit 0
 
-echo "📦 Ensuring npm deps after branch switch..."
-
-for dir in frontend backend; do
-  if [[ -f "$root/$dir/package.json" ]]; then
-    echo "  → npm install in $dir"
-    (cd "$root/$dir" && npm install --no-fund --no-audit) || echo "  ⚠ npm install failed in $dir (continuing)"
-  fi
-done
-
-echo "✅ deps ready"
+bash "$root/scripts/setup-dev.sh" || echo "⚠ deps setup failed — run: npm run setup"
